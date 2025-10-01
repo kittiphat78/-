@@ -186,12 +186,14 @@
                 <td>
                   {% if b.paid %}
                     <span class="badge bg-success"><i class="bi bi-cash-stack me-1"></i> ชำระแล้ว</span>
+                  {% elif b.slip_filename %}
+                    <span class="badge bg-info text-dark"><i class="bi bi-hourglass-split me-1"></i> รอตรวจสอบ</span>
                   {% else %}
                     <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i> รอชำระ</span>
                   {% endif %}
                 </td>
                 <td class="text-nowrap">
-                  {% if not b.paid %}
+                  {% if not b.paid and b.slip_filename %}
                     <form method="post" action="{{ url_for('admin_confirm_payment', booking_id=b.id) }}" class="d-inline">
                       <button type="submit" class="btn btn-sm btn-success me-1" title="ยืนยันการชำระเงิน">
                         <i class="bi bi-check-circle-fill"></i>

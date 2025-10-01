@@ -128,6 +128,8 @@
                 <td>
                   {% if b.paid %}
                     <span class="badge bg-success">ชำระแล้ว</span>
+                  {% elif b.slip_filename %}
+                    <span class="badge bg-info text-dark">รอตรวจสอบ</span>
                   {% else %}
                     <span class="badge bg-warning text-dark">รอชำระ</span>
                   {% endif %}
@@ -136,17 +138,25 @@
                   {% if not b.paid %}
                     <div class="d-flex flex-column align-items-center gap-2">
                       <div class="d-flex gap-2 align-items-center">
-                        <form method="post" action="{{ url_for('upload_slip', booking_id=b.id) }}" enctype="multipart/form-data" class="d-flex gap-2 align-items-center justify-content-center">
-                          <input type="file" name="slip" accept="image/*" class="form-control form-control-sm slip-input" data-booking-id="{{ b.id }}" style="max-width:120px;">
-                          <button type="submit" class="btn btn-sm btn-primary slip-btn" data-booking-id="{{ b.id }}" disabled>อัปโหลดสลิป</button>
-                        </form>
+                        {% if not b.slip_filename %}
+                          <form method="post" action="{{ url_for('upload_slip', booking_id=b.id) }}" enctype="multipart/form-data" class="d-flex gap-2 align-items-center justify-content-center">
+                            <input type="file" name="slip" accept="image/*" class="form-control form-control-sm slip-input" data-booking-id="{{ b.id }}" style="max-width:120px;">
+                            <button type="submit" class="btn btn-sm btn-primary slip-btn" data-booking-id="{{ b.id }}">อัปโหลดสลิป</button>
+                          </form>
+                        {% else %}
+                          <span class="text-muted small">รอตรวจสอบสลิป</span>
+                        {% endif %}
                         {% if not b.is_past %}
                           <form method="post" action="{{ url_for('cancel_booking', booking_id=b.id) }}" class="d-inline" onsubmit="return confirm('ยืนยันการยกเลิกการจองรหัสคิว {{ b.queue_code }} ?');">
                             <button type="submit" class="btn btn-sm btn-outline-danger">ยกเลิก</button>
                           </form>
                         {% endif %}
                       </div>
-                      <img src="" alt="preview" id="slip-preview-{{ b.id }}" class="img-fluid mt-1" style="max-width:160px;display:none;border-radius:.5rem;border:1px solid rgba(0,0,0,.06)">
+                      {% if b.slip_filename %}
+                        <a href="{{ url_for('static', filename='uploads/' ~ b.slip_filename) }}" target="_blank" class="btn btn-sm btn-outline-secondary mt-1">ดูสลิป</a>
+                      {% else %}
+                        <img src="" alt="preview" id="slip-preview-{{ b.id }}" class="img-fluid mt-1" style="max-width:160px;display:none;border-radius:.5rem;border:1px solid rgba(0,0,0,.06)">
+                      {% endif %}
                     </div>
                   {% else %}
                     {% if b.slip_filename %}
