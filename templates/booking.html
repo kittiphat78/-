@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block title %}จองคิว - Car Wash{% endblock %}
+ 
+{% block content %}
+<h2 class="text-center mt-4 mb-4">
+  <i class="bi bi-calendar-check-fill text-success"></i> จองคิวล้างรถ
+</h2>
+ 
+<style>
+  /* Booking page tweaks */
+  .booking-form-card { border-radius: 1rem; overflow: hidden; }
+  .form-icon { width:40px;height:40px;border-radius:.5rem;background:linear-gradient(90deg,#7b2cff,#2d6cff);display:inline-flex;align-items:center;justify-content:center;color:#fff }
+  .service-price-badge { font-weight:700;color:#2b2d42;background:rgba(123,44,255,0.07);padding:.2rem .5rem;border-radius:.5rem }
+  .qr-box { display:inline-block;padding:.75rem;border-radius:.6rem;background:#fff;border:1px solid rgba(0,0,0,0.06); }
+  .table thead th { vertical-align: middle; }
+  .booking-card { background:linear-gradient(180deg,#ffffff,#fbf9ff); }
+  @media (max-width:767px){ .form-icon{width:34px;height:34px} }
+</style>
+ 
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show text-center" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+ 
+<!-- ฟอร์มจองคิว -->
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-10 mb-4">
+    <div class="card shadow-sm booking-form-card booking-card p-3 hover-shadow">
+      <div class="card-body">
+        <form method="post" class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label for="date" class="form-label small fw-semibold">วันที่</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0"><span class="form-icon"><i class="bi bi-calendar-event-fill"></i></span></span>
+              <input type="date" name="date" id="date" class="form-control border-start-0" required>
+            </div>
+          </div>
+ 
+          <div class="col-md-3">
+            <label for="time" class="form-label small fw-semibold">เวลา</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0"><span class="form-icon"><i class="bi bi-clock-fill"></i></span></span>
+              <input type="time" name="time" id="time" class="form-control border-start-0" required>
+            </div>
+          </div>
+ 
+          <div class="col-md-4">
+            <label for="service" class="form-label small fw-semibold">บริการ</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0"><span class="form-icon"><i class="bi bi-list-ul"></i></span></span>
+              <select name="service" id="service" class="form-select border-start-0" required>
+                {% for s in services %}
+                <option value="{{ s.id }}" {% if selected_service and selected_service == s.id %}selected{% endif %}>{{ s.name }} <span class="text-muted">({{ s.price }}฿)</span></option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+ 
+          <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-check-circle me-1"></i> จองคิว
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+    <script>
+    // set min date to today
+    document.addEventListener('DOMContentLoaded', function(){
+      const dateIn = document.getElementById('date');
+      if(dateIn){
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth()+1).padStart(2,'0');
+        const d = String(today.getDate()).padStart(2,'0');
+        dateIn.min = `${y}-${m}-${d}`;
+      }
+    });
+    </script>
+ 
+<!-- QR Code หลังจอง -->
+{% if new_qrcode %}
+<div class="d-flex justify-content-center mb-4">
+  <div class="text-center qr-box">
+    <div class="fw-semibold mb-2">รหัสคิวของคุณ</div>
+    <img src="data:image/png;base64,{{ new_qrcode }}" alt="QR Code" style="max-width:180px;display:block;margin:0 auto;">
+    <div class="small text-muted mt-2">สแกน QR code เพื่อชำระเงินที่เคาน์เตอร์</div>
+  </div>
+</div>
+{% endif %}
+ 
+<!-- ประวัติการจอง -->
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-10">
+    <div class="card shadow-sm hover-shadow">
+      <div class="card-header bg-primary text-white text-center fw-semibold">
+        ประวัติการจองของคุณ
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-striped table-hover table-bordered m-0 align-middle">
+            <thead class="table-primary text-center">
+              <tr>
+                <th>บริการ</th>
+                <th>วันที่</th>
+                <th>เวลา</th>
+                <th>รหัสคิว</th>
+                <th>สถานะ</th>
+                <th>จ่ายเงิน</th>
+              </tr>
+            </thead>
+            <tbody class="text-center">
+              {% for b in bookings %}
+              <tr>
+                <td class="text-start">{{ b.name }}</td>
+                <td>{{ b.date }}</td>
+                <td>{{ b.time }}</td>
+                <td>{{ b.queue_code }}</td>
+                <td>
+                  {% if b.paid %}
+                    <span class="badge bg-success">ชำระแล้ว</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark">รอชำระ</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if not b.paid %}
+                    <div class="d-flex flex-column align-items-center gap-2">
+                      <div class="d-flex gap-2 align-items-center">
+                        <form method="post" action="{{ url_for('upload_slip', booking_id=b.id) }}" enctype="multipart/form-data" class="d-flex gap-2 align-items-center justify-content-center">
+                          <input type="file" name="slip" accept="image/*" class="form-control form-control-sm slip-input" data-booking-id="{{ b.id }}" style="max-width:120px;">
+                          <button type="submit" class="btn btn-sm btn-primary slip-btn" data-booking-id="{{ b.id }}" disabled>อัปโหลดสลิป</button>
+                        </form>
+                        {% if not b.is_past %}
+                          <form method="post" action="{{ url_for('cancel_booking', booking_id=b.id) }}" class="d-inline" onsubmit="return confirm('ยืนยันการยกเลิกการจองรหัสคิว {{ b.queue_code }} ?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">ยกเลิก</button>
+                          </form>
+                        {% endif %}
+                      </div>
+                      <img src="" alt="preview" id="slip-preview-{{ b.id }}" class="img-fluid mt-1" style="max-width:160px;display:none;border-radius:.5rem;border:1px solid rgba(0,0,0,.06)">
+                    </div>
+                  {% else %}
+                    {% if b.slip_filename %}
+                      <a href="{{ url_for('static', filename='uploads/' ~ b.slip_filename) }}" target="_blank" class="btn btn-sm btn-outline-secondary">ดูสลิป</a>
+                    {% else %}
+                      <button class="btn btn-sm btn-secondary" disabled>จ่ายแล้ว</button>
+                    {% endif %}
+                    {% if not b.is_past %}
+                      <form method="post" action="{{ url_for('cancel_booking', booking_id=b.id) }}" class="mt-2 d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">ยกเลิก</button>
+                      </form>
+                    {% endif %}
+                  {% endif %}
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="6" class="text-center text-muted py-3">
+                  <i class="bi bi-info-circle"></i> ยังไม่มีการจอง
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+ 
+{% block scripts %}
+<script>
+document.addEventListener('change', function(e){
+  if(!e.target.matches('.slip-input')) return;
+  const input = e.target;
+  const file = input.files[0];
+  const bid = input.dataset.bookingId;
+  const btn = document.querySelector(`.slip-btn[data-booking-id='${bid}']`);
+  const preview = document.getElementById(`slip-preview-${bid}`);
+  if(!file){
+    if(btn) btn.disabled = true;
+    if(preview) { preview.style.display='none'; preview.src=''; }
+    return;
+  }
+  const maxBytes = 3 * 1024 * 1024; // 3MB
+  if(file.size > maxBytes){
+    alert('ไฟล์ขนาดเกิน 3MB กรุณาเลือกไฟล์ขนาดเล็กลง');
+    input.value = '';
+    if(btn) btn.disabled = true;
+    if(preview) { preview.style.display='none'; preview.src=''; }
+    return;
+  }
+  // show preview
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    if(preview){ preview.src = ev.target.result; preview.style.display='block'; }
+  };
+  reader.readAsDataURL(file);
+  if(btn) btn.disabled = false;
+});
+</script>
+{% endblock %}

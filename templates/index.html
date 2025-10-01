@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% block title %}หน้าแรก - Car Wash{% endblock %}
+
+{% block content %}
+<style>
+  /* Car Wash Theme Variables */
+  :root {
+    --brand-blue: #007bff; /* Primary Blue for clean/water */
+    --brand-purple: #7b2cff; /* Secondary Purple for premium */
+    --brand-grad-from: #007bff;
+    --brand-grad-to: #0056b3;
+    --text-dark: #2b2d42;
+    --text-light: #4f5661;
+    --glass-bg: rgba(255,255,255,0.9);
+  }
+
+  /* Hero Section (Focus on water/clean theme) */
+  .hero {
+    background: linear-gradient(180deg, rgba(0, 123, 255, 0.4), rgba(0, 86, 179, 0.6)), url('{{ url_for('static', filename='images/car_wash_bg.jpg') }}') center/cover no-repeat;
+    /* หมายเหตุ: กรุณาเปลี่ยน 'car_wash_bg.jpg' เป็นชื่อรูปภาพพื้นหลังของคุณใน static/images */
+    padding: 6rem 1rem; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;
+    min-height: 80vh; /* เพิ่มความสูงเพื่อให้ Hero ดูอลังการ */
+  }
+
+  .glass {
+    background: var(--glass-bg); 
+    backdrop-filter: blur(5px); /* เพิ่ม Glass effect */
+    border-radius:1.5rem; /* ทำให้โค้งมนขึ้น */
+    max-width:1200px; width:100%; 
+    box-shadow:0 25px 50px rgba(0,0,0,0.25); 
+    padding:3rem; /* เพิ่ม padding */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  .brand { color:var(--text-dark); font-weight:900; letter-spacing:-0.03em; line-height:1.2; }
+  .lead-sub { color:var(--text-light); font-size:1.1rem; }
+
+  /* Heading Accent */
+  .brand::after { 
+    content:''; display:block; width:80px; height:6px; border-radius:6px; 
+    background:linear-gradient(90deg,var(--brand-purple),var(--brand-blue)); 
+    margin-top:.8rem; margin-bottom: 1.5rem;
+  }
+
+  /* CTA Buttons */
+  .cta-primary { background:linear-gradient(90deg,var(--brand-blue),#0056b3); border:none; color:#fff; font-weight:700; transition: transform 0.2s; }
+  .cta-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0, 123, 255, 0.5); }
+  .cta-secondary { background:#fff; color:var(--text-dark); border:1px solid rgba(43,45,66,0.15); font-weight:600; transition: transform 0.2s; }
+  .cta-secondary:hover { background: #f0f0f0; transform: translateY(-1px); }
+
+  /* Features */
+  .features { margin-top:2rem; display:flex; gap:1.5rem; flex-wrap:wrap; }
+  .feature { 
+    flex:1 1 250px; background:var(--glass-bg); 
+    border-radius:1rem; padding:1.2rem; display:flex; gap:.9rem; 
+    align-items:flex-start; box-shadow:0 8px 25px rgba(10,20,40,0.1); 
+    transition: all 0.3s;
+  }
+  .feature:hover { background: #eef7ff; transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0, 123, 255, 0.15); }
+
+  .feature .icon { 
+    width:50px;height:50px;border-radius:.75rem;display:inline-flex;align-items:center;justify-content:center;color:#fff;
+    font-size: 1.5rem;
+  }
+  /* Updated Gradients for Icons */
+  .bg-clean{background:linear-gradient(135deg,#00bfff,#0056b3)} 
+  .bg-detail{background:linear-gradient(135deg,#ffbf00,#ff9900)} 
+  .bg-fast{background:linear-gradient(135deg,#ff7e5f,#feb47b)}
+
+  /* Services Grid (Side Bar) */
+  .services { margin-top:0; display:grid; grid-template-columns: 1fr; gap:1.2rem; }
+  .svc { 
+    background:#fff; border-radius:1rem; padding:1.2rem; 
+    box-shadow:0 4px 15px rgba(10,20,40,0.08); 
+    border-left: 5px solid var(--brand-blue);
+    transition: all 0.2s;
+  }
+  .svc:hover { border-left-color: var(--brand-purple); }
+  .svc .fw-bold { color:var(--brand-blue); }
+
+  /* Testimonials */
+  .testimonials { margin-top:3rem; display:flex; gap:1.5rem; flex-wrap:wrap; }
+  .testi { 
+    flex:1 1 45%; background:#fff; padding:1.5rem;border-radius:1rem;
+    box-shadow:0 8px 25px rgba(10,20,40,0.08);
+    border: 1px solid #f0f0f0;
+  }
+  .testi .fw-semibold { color:var(--brand-blue); font-size:1.15rem; }
+  .testi i.bi-chat-quote-fill { color: var(--brand-purple); font-size: 1.5rem; margin-right: 8px; }
+
+  /* Contact Card */
+  .contact-card { 
+    background: linear-gradient(180deg, #f0f8ff, #ffffff);
+    border-radius: 1rem; 
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 991px){ 
+    .hero{padding:4rem 1rem; min-height: unset;} 
+    .glass{padding:1.5rem} 
+    .lead-sub{font-size:1rem}
+    .features { margin-top:1.5rem; }
+    .col-lg-5{ margin-top: 2rem; }
+    .testimonials { gap:1rem; }
+    .testi { flex:1 1 100%; }
+  }
+</style>
+
+<section class="hero" aria-label="Hero - Premium Car Wash">
+  <div class="glass">
+    <div class="row align-items-center">
+      <div class="col-lg-7">
+        <h1 class="brand display-3 text-uppercase">Shine & Speed<br>Premium Car Wash</h1>
+        <p class="lead-sub mt-2">บริการล้างรถครบวงจร ใส่ใจทุกรายละเอียด ด้วยเทคนิคที่ปลอดภัยต่อสีรถและวัสดุภายใน รับประกันความเงางาม!</p>
+
+        <div class="mt-4 d-flex gap-3 flex-wrap">
+          <a href="{{ url_for('booking') }}" class="btn cta-primary btn-lg">
+            <i class="bi bi-calendar-check me-2"></i> จองคิวออนไลน์
+          </a>
+          <a href="{{ url_for('services') }}" class="btn cta-secondary btn-lg">
+            <i class="bi bi-list-ul me-2"></i> ดูแพ็กเกจ & ราคา
+          </a>
+        </div>
+
+        <div class="features">
+          <div class="feature">
+            <div class="icon bg-clean"><i class="bi bi-droplet-fill"></i></div>
+            <div>
+              <div class="fw-bold text-dark">Deep Clean</div>
+              <div class="small text-muted">แชมพูสูตรพิเศษ กำจัดคราบฝังลึกได้หมดจด</div>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="icon bg-detail"><i class="bi bi-stars"></i></div>
+            <div>
+              <div class="fw-bold text-dark">Protect & Shine</div>
+              <div class="small text-muted">เคลือบสีเพิ่มความเงาและป้องกัน UV</div>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="icon bg-fast"><i class="bi bi-clock-history"></i></div>
+            <div>
+              <div class="fw-bold text-dark">Fast Service</div>
+              <div class="small text-muted">จองล่วงหน้า ไม่ต้องรอนานกว่า 20 นาที</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5 d-none d-lg-block">
+        <h4 class="fw-bold mb-3 mt-4 mt-lg-0 text-dark">บริการแนะนำ</h4>
+        <div class="services">
+          <div class="svc">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-bold">Wash & Vacuum</div>
+                <div class="small text-muted">ล้างภายนอก ดูดฝุ่นภายใน</div>
+              </div>
+                <div class="text-primary fs-4 fw-bolder">฿199</div>
+            </div>
+          </div>
+
+          <div class="svc">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-bold">Premium Detail</div>
+                <div class="small text-muted">ทำความสะอาดลึก ขัดเงา และปกป้อง</div>
+              </div>
+                <div class="text-primary fs-4 fw-bolder">฿399</div>
+            </div>
+          </div>
+
+          <div class="svc">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="fw-bold">Coating</div>
+                <div class="small text-muted">เคลือบเซรามิก หรือแวกซ์ยาวนาน</div>
+              </div>
+                <div class="text-primary fs-4 fw-bolder">฿699</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container mt-5">
+  <div class="row">
+    <div class="col-lg-8">
+      <h4 class="fw-bold text-dark mb-4 border-bottom pb-2">ทำไมต้องเลือกเรา?</h4>
+      <div class="testimonials">
+        
+        <div class="testi col-12 col-md-6">
+          <div class="fw-bold mb-1">
+            <i class="bi bi-chat-quote-fill"></i> "รถเงาเหมือนออกศูนย์!"
+          </div>
+          <div class="small text-muted">ทีมงานใส่ใจทุกซอกทุกมุม ตั้งแต่ล้อไปจนถึงหลังคา ใช้เวลาไม่นาน แต่ผลลัพธ์พรีเมี่ยมสุดๆ</div>
+          <div class="mt-2 fw-semibold text-warning">
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <span class="small text-dark ms-1 fw-bold">(5.0/5)</span>
+          </div>
+        </div>
+        
+        <div class="testi col-12 col-md-6">
+          <div class="fw-bold mb-1">
+            <i class="bi bi-chat-quote-fill"></i> "ผลิตภัณฑ์ปลอดภัยต่อสีรถ"
+          </div>
+          <div class="small text-muted">มั่นใจได้ว่าใช้แต่น้ำยาคุณภาพ ไม่ทำลายผิวสีรถ ทำให้รถยังคงความสดใหม่ ไม่เกิดรอยขีดข่วน</div>
+          <div class="mt-2 fw-semibold text-warning">
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-half"></i>
+            <span class="small text-dark ms-1 fw-bold">(4.8/5)</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col-lg-4 mt-4 mt-lg-0">
+      <div class="card p-3 shadow-lg text-center contact-card">
+        <h5 class="fw-bold text-dark">พร้อมให้รถของคุณเงางามแล้วหรือยัง?</h5>
+        <div class="small text-muted">สอบถามหรือจองคิวง่าย ๆ ได้เลย!</div>
+        <hr class="my-3">
+        
+        <div class="d-flex justify-content-center gap-2 mb-3">
+          <a href="tel:021234567" class="btn btn-outline-primary btn-lg d-flex align-items-center fw-semibold">
+            <i class="bi bi-telephone-fill me-2"></i> โทรหาเรา
+          </a>
+          <a href="#" class="btn btn-outline-secondary btn-lg d-flex align-items-center fw-semibold">
+            <i class="bi bi-geo-alt-fill me-2"></i> แผนที่
+          </a>
+        </div>
+        
+        <a href="{{ url_for('booking') }}" class="btn cta-primary w-100 btn-lg fw-bold">
+          <i class="bi bi-bookmark-plus-fill me-2"></i> จองคิวล้างรถด่วน!
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

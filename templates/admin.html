@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %}Admin - Car Wash{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="text-center mt-4 mb-3">
+    <h2 class="mb-0 text-primary fw-bold display-6">
+      <i class="bi bi-gear-fill text-dark"></i> Admin Dashboard
+    </h2>
+    <p class="text-muted small mt-1">จัดการราคาบริการและดูรายงานการจองประจำวัน</p>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <style>
+    /* Custom Styling for Car Wash Admin Theme */
+    :root {
+      --car-wash-blue: #007bff; /* Primary Blue for clean/water */
+      --car-wash-yellow: #ffc107; /* Warning Yellow for foam/soap */
+      --car-wash-green: #28a745;
+      --car-car-gray: #343a40;
+    }
+    .admin-grid { display:grid; grid-template-columns: 1fr; gap:1.5rem; }
+    @media(min-width:992px){ .admin-grid { grid-template-columns: 480px 1fr; } }
+    
+    .panel { border-radius: 1rem; overflow:hidden; transition: transform 0.2s, box-shadow 0.2s; }
+    /* เพิ่ม hover effect ให้ panel */
+    .panel:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+
+    .panel .panel-head { padding: 1rem; font-size: 1.15rem; }
+    .panel .panel-body { padding: 1.25rem; }
+    
+    .price-input { display:flex; gap:.5rem; align-items:center; }
+    .price-input input { max-width:160px; border-radius: .5rem; }
+    
+    .save-btn { 
+      background: var(--car-wash-green); /* ใช้สีเขียว */
+      border:none; 
+      color:#fff; 
+      font-weight: bold;
+      border-radius: .75rem;
+      transition: background 0.2s;
+    }
+    .save-btn:hover { background: #1e7e34; }
+
+    /* ปรับ Report Summary ให้ดูเป็น Widget สรุปยอดเงิน */
+    .report-summary { 
+      padding:1rem; 
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef); 
+      border-radius:.85rem; 
+      box-shadow:0 8px 20px rgba(0,0,0,0.08); 
+      border: 1px solid #dee2e6;
+    }
+    .fs-5.fw-bold { 
+        color: var(--car-car-gray); /* เน้นสีเข้ม */
+        font-size: 1.75rem !important;
+        font-weight: 800 !important;
+    }
+    
+    /* สไตล์ตารางรายงาน */
+    .table-responsive .table thead tr {
+      background-color: var(--car-wash-yellow) !important;
+      color: var(--car-car-gray); /* สีตัวอักษรเข้ม */
+    }
+    .table-responsive .table-hover tbody tr:hover {
+      background-color: rgba(0, 123, 255, 0.05) !important;
+    }
+    
+    /* สไตล์ตารางการจองล่าสุด */
+    .recent-booking-table thead tr {
+      background-color: var(--car-wash-blue) !important;
+      color: #fff;
+    }
+  </style>
+
+  <div class="admin-grid mb-4">
+    <div class="panel card shadow-lg">
+      <div class="panel-head bg-primary text-white text-center fw-semibold">
+        <i class="bi bi-tags-fill me-2"></i> จัดการราคาบริการ
+      </div>
+      <div class="panel-body">
+        <form method="post">
+          <div class="row g-3">
+            {% for s in services %}
+            <div class="col-12">
+              <label class="form-label fw-bold mb-1">{{ s.name }}</label>
+              <div class="price-input">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-currency-dollar text-success"></i></span>
+                <input type="number" name="{{ s.id }}" value="{{ s.price }}" class="form-control form-control-lg border-start-0" min="0" required>
+                <div class="text-muted small fw-semibold">บาท</div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <div class="col-12 mt-4">
+              <button type="submit" class="btn save-btn w-100">
+                <i class="bi bi-cloud-check me-2"></i> บันทึกการเปลี่ยนแปลง
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel card shadow-lg">
+        <div class="panel-head bg-light text-dark text-center fw-semibold border-bottom">
+          <i class="bi bi-bar-chart-fill text-warning me-2"></i> รายงานการจองรายวัน
+        </div>
+        <div class="panel-body">
+          <div class="report-summary mb-4 d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-semibold text-muted small">รวมเงินทั้งหมดวันนี้</div>
+              <div class="fs-5 fw-bold text-success">฿{{ total_income|default(0) }}</div>
+            </div>
+            <div class="text-end">
+              <div class="small text-muted">ยอดจองรวม</div>
+              <div class="fs-5 fw-bold text-primary">{{ total_bookings }} คิว</div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover table-bordered align-middle mb-0">
+              <thead>
+                <tr class="table-warning text-center">
+                  <th>วันที่</th>
+                  <th>จำนวนการจอง</th>
+                  <th>ยอดเงินรวม (บาท)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in report %}
+                <tr>
+                  <td class="text-start fw-semibold">{{ r.date }}</td>
+                  <td class="text-center">{{ r.total_bookings }}</td>
+                  <td class="text-center fw-bold">฿{{ r.total_price|default(0) }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="3" class="text-center text-muted py-3">
+                    <i class="bi bi-info-circle"></i> ยังไม่มีข้อมูล
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <div class="card shadow-lg mb-4">
+      <div class="card-header bg-dark text-white fw-bold recent-booking-table">
+        <i class="bi bi-clipboard-check-fill me-2"></i> การจองล่าสุด
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover m-0 align-middle">
+            <thead class="bg-primary text-white text-center recent-booking-table">
+              <tr>
+                <th>วันที่/เวลา</th>
+                <th>ผู้ใช้</th>
+                <th>บริการ</th>
+                <th>รหัสคิว</th>
+                <th>สถานะ</th>
+                <th>จัดการ</th>
+              </tr>
+            </thead>
+            <tbody class="text-center">
+              {% for b in bookings %}
+              <tr>
+                <td><span class="fw-semibold">{{ b.date }}</span><br><span class="small text-muted">{{ b.time }}</span></td>
+                <td class="text-start">{{ b.full_name or b.username }}</td>
+                <td class="text-start">{{ b.service_name }}</td>
+                <td><span class="badge bg-secondary">{{ b.queue_code }}</span></td>
+                <td>
+                  {% if b.paid %}
+                    <span class="badge bg-success"><i class="bi bi-cash-stack me-1"></i> ชำระแล้ว</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i> รอชำระ</span>
+                  {% endif %}
+                </td>
+                <td class="text-nowrap">
+                  {% if not b.paid %}
+                    <form method="post" action="{{ url_for('admin_confirm_payment', booking_id=b.id) }}" class="d-inline">
+                      <button type="submit" class="btn btn-sm btn-success me-1" title="ยืนยันการชำระเงิน">
+                        <i class="bi bi-check-circle-fill"></i>
+                      </button>
+                    </form>
+                  {% endif %}
+
+                  <form method="post" action="{{ url_for('admin_cancel_booking', booking_id=b.id) }}" class="d-inline" onsubmit="return confirm('ยืนยันการยกเลิกการจองรหัสคิว {{ b.queue_code }} ?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="ยกเลิกการจอง">
+                      <i class="bi bi-trash-fill"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="6" class="text-center text-muted py-3">ยังไม่มีการจอง</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}

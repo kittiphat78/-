@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}สมัครสมาชิก{% endblock %}
+
+{% block content %}
+<style>
+  .signup-card { background: linear-gradient(180deg,#ffffff 0%,#f7fff8 100%); border: none; }
+  .hover-shadow { transition: transform .18s ease, box-shadow .18s ease; }
+  .hover-shadow:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(6,80,38,0.08); }
+  .pwd-hint { font-size: 0.85rem; color: #6c757d; }
+  .strength-weak { color: #dc3545; }
+  .strength-medium { color: #ffc107; }
+  .strength-strong { color: #28a745; }
+</style>
+
+<div class="d-flex justify-content-center align-items-center" style="min-height:75vh;">
+  <div class="card signup-card shadow-sm p-4 col-11 col-sm-9 col-md-7 col-lg-5 rounded-4 hover-shadow">
+
+    <div class="text-center mb-3">
+      <div class="d-inline-flex align-items-center justify-content-center bg-success rounded-circle" style="width:64px;height:64px;">
+        <i class="bi bi-person-plus text-white fs-3"></i>
+      </div>
+    </div>
+
+    <h3 class="text-center mb-3 fw-semibold">สมัครสมาชิก</h3>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" novalidate>
+      <div class="form-floating mb-3">
+        <input type="text" name="username" id="username" class="form-control" placeholder="ชื่อผู้ใช้" required autocomplete="username">
+        <label for="username">ชื่อผู้ใช้ *</label>
+      </div>
+
+      <div class="form-floating mb-3 position-relative">
+        <input type="password" name="password" id="password" class="form-control" placeholder="รหัสผ่าน" required autocomplete="new-password">
+        <label for="password">รหัสผ่าน *</label>
+        <button type="button" class="btn btn-sm btn-outline-secondary position-absolute" style="top:10px;right:10px;" id="togglePwd">แสดง</button>
+      </div>
+
+      <div class="form-floating mb-2">
+        <input type="password" name="confirm" id="confirm" class="form-control" placeholder="ยืนยันรหัสผ่าน" required autocomplete="new-password">
+        <label for="confirm">ยืนยันรหัสผ่าน *</label>
+      </div>
+
+      <div class="mb-2 pwd-hint" id="pwdHint">ความยาวอย่างน้อย 8 ตัวอักษร, ผสมตัวอักษรและตัวเลข</div>
+
+      <div class="form-floating mb-3">
+        <input type="text" name="full_name" id="full_name" class="form-control" placeholder="ชื่อ-นามสกุล">
+        <label for="full_name">ชื่อ-นามสกุล</label>
+      </div>
+
+      <div class="form-floating mb-3">
+        <input type="tel" name="phone" id="phone" class="form-control" placeholder="เบอร์โทร">
+        <label for="phone">เบอร์โทร</label>
+      </div>
+
+      <button type="submit" class="btn btn-success w-100 mt-2">
+        <i class="bi bi-person-plus me-1"></i> สมัครสมาชิก
+      </button>
+
+      <div class="text-center mt-3 small text-muted">
+        มีบัญชีอยู่แล้ว? <a href="{{ url_for('login') }}">เข้าสู่ระบบ</a>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<script>
+  (function(){
+    const pwd = document.getElementById('password');
+    const toggle = document.getElementById('togglePwd');
+    const hint = document.getElementById('pwdHint');
+
+    if(toggle){
+      toggle.addEventListener('click', () => {
+        if(pwd.type === 'password'){
+          pwd.type = 'text';
+          toggle.textContent = 'ซ่อน';
+        } else {
+          pwd.type = 'password';
+          toggle.textContent = 'แสดง';
+        }
+      });
+    }
+
+    function strength(s){
+      if(s.length < 8) return 'weak';
+      if(/[A-Za-z]/.test(s) && /\d/.test(s) && /[^A-Za-z0-9]/.test(s)) return 'strong';
+      if(/[A-Za-z]/.test(s) && /\d/.test(s)) return 'medium';
+      return 'weak';
+    }
+
+    if(pwd){
+      pwd.addEventListener('input', (e) => {
+        const s = strength(e.target.value);
+        hint.classList.remove('strength-weak','strength-medium','strength-strong');
+        if(s === 'weak') hint.classList.add('strength-weak');
+        if(s === 'medium') hint.classList.add('strength-medium');
+        if(s === 'strong') hint.classList.add('strength-strong');
+        if(s === 'weak') hint.textContent = 'ระดับรหัสผ่าน: อ่อน — ควรมีความยาวอย่างน้อย 8 ตัวและผสมตัวเลข';
+        if(s === 'medium') hint.textContent = 'ระดับรหัสผ่าน: ปานกลาง — เพิ่มอักขระพิเศษเพื่อความปลอดภัยมากขึ้น';
+        if(s === 'strong') hint.textContent = 'ระดับรหัสผ่าน: แข็งแรง — ดีแล้ว!';
+      });
+    }
+  })();
+</script>
+
+{% endblock %}
