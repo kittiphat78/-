@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Add new car wash services to database",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"-c",
+				"import sqlite3; db=sqlite3.connect('carwash.db'); db.execute(\"INSERT INTO services(name,price) VALUES ('ล้างห้องเครื่อง',299)\"); db.execute(\"INSERT INTO services(name,price) VALUES ('ล้างช่วงล่าง',259)\"); db.execute(\"INSERT INTO services(name,price) VALUES ('ขัดเคลือบกระจก',189)\"); db.commit(); db.close()"
+			],
+			"problemMatcher": []
+		}
+	]
+}

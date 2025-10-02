@@ -122,37 +122,45 @@
     {% for s in services %}
     {% set s_name = (s.name or '')|lower %}
     {% set service_description = "การทำความสะอาดพื้นฐานและดูดฝุ่นภายในอย่างรวดเร็ว เหมาะสำหรับรถใช้งานประจำวัน" %}
-    {% set service_image_idx = loop.index0 % 6 %}
+    {% set service_image = 'images/car0.jpg' %}
     {% set price_display = s.price or 199 %}
 
     {% if 'ล้างพรีเมี่ยม' in s.name or 'premium' in s_name %}
       {% set service_description = "แพ็กเกจยอดนิยม! ล้างละเอียด ลงแวกซ์น้ำ และทำความสะอาดคอนโซลภายใน เพื่อความเงางามที่ยาวนาน" %}
-      {% set service_image_idx = 1 %}
+      {% set service_image = 'images/car1.jpg' %}
       {% set price_display = s.price or 399 %}
     {% elif 'เคลือบสี' in s.name or 'coat' in s_name %}
       {% set service_description = "บริการเคลือบสีและฟิล์มป้องกันระดับนาโน ช่วยปกป้องสีรถจากรอยขีดข่วนและสิ่งสกปรก ให้รถเงาฉ่ำเหมือนใหม่" %}
-      {% set service_image_idx = 2 %}
+      {% set service_image = 'images/car2.jpg' %}
       {% set price_display = s.price or 699 %}
+    {% elif 'ห้องเครื่อง' in s.name %}
+      {% set service_description = "ล้างทำความสะอาดห้องเครื่องยนต์อย่างพิถีพิถัน ปลอดภัย ไม่ทำลายอุปกรณ์ไฟฟ้า" %}
+      {% set service_image = 'images/car0.jpg' %}
+      {% set price_display = s.price or 299 %}
+    {% elif 'ช่วงล่าง' in s.name %}
+      {% set service_description = "ล้างขจัดคราบโคลนและสิ่งสกปรกใต้ท้องรถ เพิ่มความปลอดภัยและยืดอายุการใช้งาน" %}
+      {% set service_image = 'images/car1.jpg' %}
+      {% set price_display = s.price or 259 %}
+    {% elif 'กระจก' in s.name %}
+      {% set service_description = "ขัดและเคลือบกระจกทุกบาน เพิ่มความใส ลดคราบน้ำ เกาะแน่น ทัศนวิสัยดีขึ้น" %}
+      {% set service_image = 'images/car2.jpg' %}
+      {% set price_display = s.price or 189 %}
     {% endif %}
 
     <div class="col-sm-6 col-lg-4 mb-4">
       <div class="service-card shadow-lg">
         <div class="service-image-wrapper">
-          {# ใช้รูปภาพจำลองตามชื่อบริการ #}
-          <img src="{{ url_for('static', filename='images/car' ~ service_image_idx ~ '.jpg') }}" 
+          <img src="{{ url_for('static', filename=service_image) }}" 
                alt="รูปภาพบริการ {{ s.name }}" 
                loading="lazy">
         </div>
 
         <div class="service-card-body">
           <h5 class="service-title">{{ s.name }}</h5>
-          
           <p class="service-description">{{ service_description }}</p>
-
           <div class="service-price">
             <sup>เริ่มต้นเพียง</sup> ฿{{ price_display }}
           </div>
-
           <a href="{{ url_for('booking', service_id=s.id) }}" class="btn">
             <i class="bi bi-calendar-check me-1"></i> จองทันที!
           </a>
