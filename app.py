@@ -1,9 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, send_from_directory
 import sqlite3, hashlib, random, string, os
 from datetime import datetime
 import io, base64
 import qrcode
-from flask import send_file
 
 app = Flask(__name__)
 app.secret_key = "S_U_P_E_R_S_E_C_R_E_T"
@@ -378,8 +377,8 @@ def admin():
         
         # Recent bookings for admin (show date + time + user + service)
         bookings = conn.execute("""
-            SELECT b.id, b.date, b.time, b.queue_code, b.paid, s.name AS service_name,
-                   u.username, u.full_name
+         SELECT b.id, b.date, b.time, b.queue_code, b.paid, s.name AS service_name,
+             u.username, u.full_name, b.slip_filename
             FROM bookings b
             JOIN services s ON b.service_id=s.id
             LEFT JOIN users u ON b.user_id = u.id

@@ -193,6 +193,11 @@
                   {% endif %}
                 </td>
                 <td class="text-nowrap">
+                  {% if b.slip_filename %}
+                    <a href="{{ url_for('static', filename='uploads/' ~ b.slip_filename) }}" target="_blank" class="btn btn-sm btn-info me-1" title="ดูสลิป">
+                      <i class="bi bi-receipt"></i>
+                    </a>
+                  {% endif %}
                   {% if not b.paid and b.slip_filename %}
                     <form method="post" action="{{ url_for('admin_confirm_payment', booking_id=b.id) }}" class="d-inline">
                       <button type="submit" class="btn btn-sm btn-success me-1" title="ยืนยันการชำระเงิน">
@@ -200,7 +205,6 @@
                       </button>
                     </form>
                   {% endif %}
-
                   <form method="post" action="{{ url_for('admin_cancel_booking', booking_id=b.id) }}" class="d-inline" onsubmit="return confirm('ยืนยันการยกเลิกการจองรหัสคิว {{ b.queue_code }} ?');">
                     <button type="submit" class="btn btn-sm btn-outline-danger" title="ยกเลิกการจอง">
                       <i class="bi bi-trash-fill"></i>
